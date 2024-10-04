@@ -33,13 +33,16 @@ function PushupTracker() {
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-4 mb-4">
+    <div className="w-full max-w-md mx-auto bg-pastel-yellow p-6 rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-pastel-purple">
+        Pushup Tracker
+      </h2>
+      <div className="flex flex-col items-center gap-4 mb-6">
         <Select
           value={selectedCount.toString()}
           onValueChange={(value) => setSelectedCount(Number(value))}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full max-w-[200px] bg-white">
             <SelectValue placeholder="Select pushup count" />
           </SelectTrigger>
           <SelectContent>
@@ -50,17 +53,31 @@ function PushupTracker() {
             ))}
           </SelectContent>
         </Select>
-        <Button onClick={handleAddPushups}>Add Pushups</Button>
+        <Button
+          onClick={handleAddPushups}
+          className="w-full max-w-[200px] bg-pastel-green hover:bg-pastel-blue text-black"
+        >
+          Add Pushups
+        </Button>
       </div>
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Pushup History</h2>
-        <ul>
-          {pushups.map((pushup) => (
-            <li key={pushup.id} className="mb-2">
-              {pushup.count} pushups on {new Date(pushup.date).toLocaleString()}
-            </li>
-          ))}
-        </ul>
+      <div className="bg-white p-4 rounded-lg">
+        <h3 className="text-xl font-semibold mb-4 text-center text-pastel-pink">
+          Pushup History
+        </h3>
+        {pushups.length === 0 ? (
+          <p className="text-center text-gray-500">
+            No pushups recorded yet. Start adding some!
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {pushups.map((pushup) => (
+              <li key={pushup.id} className="bg-pastel-blue p-2 rounded">
+                <span className="font-bold">{pushup.count}</span> pushups on{' '}
+                {new Date(pushup.date).toLocaleString()}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

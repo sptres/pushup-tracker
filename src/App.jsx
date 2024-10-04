@@ -2,8 +2,7 @@ import PushupTracker from './components/PushupTracker';
 
 function App() {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Pushup Tracker</h1>
+    <div className="w-full min-h-screen bg-gradient-to-br from-pastel-blue to-pastel-purple flex items-center justify-center p-4">
       <PushupTracker />
     </div>
   );
