@@ -9,73 +9,92 @@ import {
 } from '@/components/ui/select';
 
 function PushupTracker() {
-  const [pushups, setPushups] = useState([]);
+  const [pushupLogs, setPushupLogs] = useState(() => {
+    const storedLogs = localStorage.getItem('pushupLogs');
+    return storedLogs ? JSON.parse(storedLogs) : {};
+  });
   const [selectedCount, setSelectedCount] = useState(10);
 
   useEffect(() => {
-    const storedPushups = localStorage.getItem('pushups');
-    if (storedPushups) {
-      setPushups(JSON.parse(storedPushups));
-    }
-  }, []);
+    localStorage.setItem('pushupLogs', JSON.stringify(pushupLogs));
+  }, [pushupLogs]);
 
   useEffect(() => {
-    localStorage.setItem('pushups', JSON.stringify(pushups));
-  }, [pushups]);
+    const checkNewDay = () => {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      if (!pushupLogs[today]) {
+        setPushupLogs((prevLogs) => ({ ...prevLogs, [today]: 0 }));
+      }
+    };
+
+    checkNewDay();
+    const interval = setInterval(checkNewDay, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [pushupLogs]);
 
   const handleAddPushups = () => {
-    const newPushup = {
-      id: Date.now(),
-      count: selectedCount,
-      date: new Date().toISOString(),
-    };
-    setPushups([...pushups, newPushup]);
+    const today = new Date().toISOString().split('T')[0];
+    setPushupLogs((prevLogs) => ({
+      ...prevLogs,
+      [today]: (prevLogs[today] || 0) + selectedCount,
+    }));
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-pastel-yellow p-6 rounded-lg shadow-lg">
+    <div className="w-full max-w-md mx-auto bg-pastel-yellow p-6 rounded-3xl shadow-lg">
       <h2 className="text-3xl font-bold mb-6 text-center text-pastel-purple">
         Pushup Tracker
       </h2>
       <div className="flex flex-col items-center gap-4 mb-6">
-        <Select
-          value={selectedCount.toString()}
-          onValueChange={(value) => setSelectedCount(Number(value))}
-        >
-          <SelectTrigger className="w-full max-w-[200px] bg-white">
-            <SelectValue placeholder="Select pushup count" />
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 15, 20, 25, 30].map((count) => (
-              <SelectItem key={count} value={count.toString()}>
-                {count} pushups
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-full max-w-[200px] mb-20">
+          {' '}
+          {/* Added wrapper with bottom margin */}
+          <Select
+            value={selectedCount.toString()}
+            onValueChange={(value) => setSelectedCount(Number(value))}
+          >
+            <SelectTrigger className="w-full bg-white rounded-full">
+              <SelectValue placeholder="Select pushup count" />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 15, 20, 25, 30].map((count) => (
+                <SelectItem key={count} value={count.toString()}>
+                  {count} pushups
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           onClick={handleAddPushups}
-          className="w-full max-w-[200px] bg-pastel-green hover:bg-pastel-blue text-black"
+          className="w-full max-w-[200px] bg-pastel-green hover:bg-pastel-blue text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg"
         >
           Add Pushups
         </Button>
       </div>
-      <div className="bg-white p-4 rounded-lg">
+      <div className="bg-white p-4 rounded-2xl shadow-inner">
         <h3 className="text-xl font-semibold mb-4 text-center text-pastel-pink">
           Pushup History
         </h3>
-        {pushups.length === 0 ? (
+        {Object.keys(pushupLogs).length === 0 ? (
           <p className="text-center text-gray-500">
             No pushups recorded yet. Start adding some!
           </p>
         ) : (
           <ul className="space-y-2">
-            {pushups.map((pushup) => (
-              <li key={pushup.id} className="bg-pastel-blue p-2 rounded">
-                <span className="font-bold">{pushup.count}</span> pushups on{' '}
-                {new Date(pushup.date).toLocaleString()}
-              </li>
-            ))}
+            {Object.entries(pushupLogs)
+              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
+              .map(([date, count]) => (
+                <li
+                  key={date}
+                  className="bg-pastel-blue p-2 rounded-xl shadow-sm flex justify-between items-center"
+                >
+                  <span>{new Date(date).toLocaleDateString()}</span>
+                  <span className="font-bold">{count} pushups</span>
+                </li>
+              ))}
           </ul>
         )}
       </div>
