@@ -72,8 +72,8 @@ function PushupTracker() {
   }, [pushupLogs]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-pastel-yellow p-6 rounded-3xl shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-center text-pastel-purple">
+    <div className="w-full max-w-4xl mx-auto bg-modern-navy p-6 rounded-3xl shadow-lg text-modern-gray">
+      <h2 className="text-3xl font-bold mb-6 text-center text-modern-salmon">
         Pushup Tracker
       </h2>
       <div className="flex flex-col items-center gap-4 mb-6">
@@ -83,10 +83,10 @@ function PushupTracker() {
               value={selectedCount.toString()}
               onValueChange={(value) => setSelectedCount(Number(value))}
             >
-              <SelectTrigger className="w-full bg-white rounded-full">
+              <SelectTrigger className="w-full bg-modern-blue text-modern-gray rounded-full">
                 <SelectValue placeholder="Select count" />
               </SelectTrigger>
-              <SelectContent className="bg-white rounded-xl shadow-md">
+              <SelectContent className="bg-modern-blue text-modern-gray rounded-xl shadow-md">
                 {[10, 15, 20, 25, 30].map((count) => (
                   <SelectItem key={count} value={count.toString()}>
                     {count}
@@ -97,7 +97,7 @@ function PushupTracker() {
           </div>
           <Button
             onClick={handleAddPushups}
-            className="flex-1 bg-pastel-green hover:bg-pastel-blue text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg"
+            className="flex-1 bg-modern-salmon hover:bg-modern-blue text-modern-gray rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg"
           >
             Add Pushups
           </Button>
@@ -106,28 +106,28 @@ function PushupTracker() {
           <Button
             onClick={() => setView('list')}
             className={`${
-              view === 'list' ? 'bg-pastel-blue' : 'bg-white'
-            } text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
+              view === 'list' ? 'bg-modern-blue' : 'bg-modern-navy'
+            } text-modern-gray rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
           >
             List View
           </Button>
           <Button
             onClick={() => setView('calendar')}
             className={`${
-              view === 'calendar' ? 'bg-pastel-blue' : 'bg-white'
-            } text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
+              view === 'calendar' ? 'bg-modern-blue' : 'bg-modern-navy'
+            } text-modern-gray rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
           >
             Calendar View
           </Button>
         </div>
       </div>
       {view === 'list' ? (
-        <div className="bg-white p-4 rounded-2xl shadow-inner">
-          <h3 className="text-xl font-semibold mb-4 text-center text-pastel-pink">
+        <div className="bg-modern-blue p-4 rounded-2xl shadow-inner">
+          <h3 className="text-xl font-semibold mb-4 text-center text-modern-salmon">
             Pushup History
           </h3>
           {Object.keys(pushupLogs).length === 0 ? (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-modern-gray">
               No pushups recorded yet. Start adding some!
             </p>
           ) : (
@@ -137,7 +137,7 @@ function PushupTracker() {
                 .map(([date, count]) => (
                   <li
                     key={date}
-                    className="bg-pastel-blue p-2 rounded-xl shadow-sm flex justify-between items-center"
+                    className="bg-modern-navy p-2 rounded-xl shadow-sm flex justify-between items-center"
                   >
                     <span>{new Date(date).toLocaleDateString()}</span>
                     <span className="font-bold">{count} pushups</span>
@@ -148,7 +148,7 @@ function PushupTracker() {
         </div>
       ) : (
         <div
-          className="bg-white p-4 rounded-2xl shadow-inner"
+          className="bg-modern-blue p-4 rounded-2xl shadow-inner"
           style={{ height: '500px' }}
         >
           <Calendar
