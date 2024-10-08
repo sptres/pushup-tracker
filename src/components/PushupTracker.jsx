@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -7,6 +7,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import format from 'date-fns/format';
+import parse from 'date-fns/parse';
+import startOfWeek from 'date-fns/startOfWeek';
+import getDay from 'date-fns/getDay';
+import enUS from 'date-fns/locale/en-US';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const locales = {
+  'en-US': enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 function PushupTracker() {
   const [pushupLogs, setPushupLogs] = useState(() => {
@@ -14,6 +33,7 @@ function PushupTracker() {
     return storedLogs ? JSON.parse(storedLogs) : {};
   });
   const [selectedCount, setSelectedCount] = useState(10);
+  const [view, setView] = useState('list'); // 'list' or 'calendar'
 
   useEffect(() => {
     localStorage.setItem('pushupLogs', JSON.stringify(pushupLogs));
@@ -42,62 +62,104 @@ function PushupTracker() {
     }));
   };
 
+  const calendarEvents = useMemo(() => {
+    return Object.entries(pushupLogs).map(([date, count]) => ({
+      title: `${count} pushups`,
+      start: new Date(date),
+      end: new Date(date),
+      allDay: true,
+    }));
+  }, [pushupLogs]);
+
   return (
-    <div className="w-full max-w-md mx-auto bg-pastel-yellow p-6 rounded-3xl shadow-lg">
+    <div className="w-full max-w-4xl mx-auto bg-pastel-yellow p-6 rounded-3xl shadow-lg">
       <h2 className="text-3xl font-bold mb-6 text-center text-pastel-purple">
         Pushup Tracker
       </h2>
       <div className="flex flex-col items-center gap-4 mb-6">
-        <div className="w-full max-w-[200px] mb-20">
-          {' '}
-          {/* Added wrapper with bottom margin */}
-          <Select
-            value={selectedCount.toString()}
-            onValueChange={(value) => setSelectedCount(Number(value))}
+        <div className="flex flex-row items-center justify-between w-full gap-4">
+          <div className="flex-1">
+            <Select
+              value={selectedCount.toString()}
+              onValueChange={(value) => setSelectedCount(Number(value))}
+            >
+              <SelectTrigger className="w-full bg-white rounded-full">
+                <SelectValue placeholder="Select count" />
+              </SelectTrigger>
+              <SelectContent className="bg-white rounded-xl shadow-md">
+                {[10, 15, 20, 25, 30].map((count) => (
+                  <SelectItem key={count} value={count.toString()}>
+                    {count}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            onClick={handleAddPushups}
+            className="flex-1 bg-pastel-green hover:bg-pastel-blue text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg"
           >
-            <SelectTrigger className="w-full bg-white rounded-full">
-              <SelectValue placeholder="Select pushup count" />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 15, 20, 25, 30].map((count) => (
-                <SelectItem key={count} value={count.toString()}>
-                  {count} pushups
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            Add Pushups
+          </Button>
         </div>
-        <Button
-          onClick={handleAddPushups}
-          className="w-full max-w-[200px] bg-pastel-green hover:bg-pastel-blue text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg"
+        <div className="flex gap-4">
+          <Button
+            onClick={() => setView('list')}
+            className={`${
+              view === 'list' ? 'bg-pastel-blue' : 'bg-white'
+            } text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
+          >
+            List View
+          </Button>
+          <Button
+            onClick={() => setView('calendar')}
+            className={`${
+              view === 'calendar' ? 'bg-pastel-blue' : 'bg-white'
+            } text-black rounded-full shadow-md transition-all duration-300 ease-in-out hover:shadow-lg`}
+          >
+            Calendar View
+          </Button>
+        </div>
+      </div>
+      {view === 'list' ? (
+        <div className="bg-white p-4 rounded-2xl shadow-inner">
+          <h3 className="text-xl font-semibold mb-4 text-center text-pastel-pink">
+            Pushup History
+          </h3>
+          {Object.keys(pushupLogs).length === 0 ? (
+            <p className="text-center text-gray-500">
+              No pushups recorded yet. Start adding some!
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {Object.entries(pushupLogs)
+                .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
+                .map(([date, count]) => (
+                  <li
+                    key={date}
+                    className="bg-pastel-blue p-2 rounded-xl shadow-sm flex justify-between items-center"
+                  >
+                    <span>{new Date(date).toLocaleDateString()}</span>
+                    <span className="font-bold">{count} pushups</span>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div
+          className="bg-white p-4 rounded-2xl shadow-inner"
+          style={{ height: '500px' }}
         >
-          Add Pushups
-        </Button>
-      </div>
-      <div className="bg-white p-4 rounded-2xl shadow-inner">
-        <h3 className="text-xl font-semibold mb-4 text-center text-pastel-pink">
-          Pushup History
-        </h3>
-        {Object.keys(pushupLogs).length === 0 ? (
-          <p className="text-center text-gray-500">
-            No pushups recorded yet. Start adding some!
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {Object.entries(pushupLogs)
-              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
-              .map(([date, count]) => (
-                <li
-                  key={date}
-                  className="bg-pastel-blue p-2 rounded-xl shadow-sm flex justify-between items-center"
-                >
-                  <span>{new Date(date).toLocaleDateString()}</span>
-                  <span className="font-bold">{count} pushups</span>
-                </li>
-              ))}
-          </ul>
-        )}
-      </div>
+          <Calendar
+            localizer={localizer}
+            events={calendarEvents}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: '100%' }}
+          />
+        </div>
+      )}
     </div>
   );
 }
